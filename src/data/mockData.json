@@ -2,8 +2,9 @@
   {
     "id": 1,
     "videoUrl": "./reels/skating.mp4",
-    "title": "DEATH EP 01",
-    "description": "searching for a murderer whelydic honeymoon is tragically cut...",
+    "title": "DEATH",
+    "episode": "EP 01",
+    "description": "searching for a murderer whose deadly honeymoon is tragically cut short. As new clues emerge and the suspect list grows longer, the team races against time in a tense and unpredictable thriller.",
     "userName": "Gabar Singh",
     "userImage": "./profilepic/skateboard.jpg",
     "likes": 200000,
@@ -15,14 +16,15 @@
   {
     "id": 2,
     "videoUrl": "./reels/model.mp4",
-    "title": "TRAVEL EP 02",
-    "description": "exploring hidden gems in the mountains...",
+    "title": "TRAVEL",
+    "episode": "EP 02",
+    "description": "exploring hidden gems in the mountains made me realise there is more to life than gems. But after realising there was more to life i realised i could have found the gems and used to buy car",
     "userName": "Priya Sharma",
-    "userImage": "./profilepic/model.jpg",
+    "userImage": "./profilepic/amodel.jpg",
     "likes": 150000,
     "comments": 900,
     "shares": 300,
     "earnings": 1500,
-    "isPaid": false
+    "isPaid": true
   }
 ]
