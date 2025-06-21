@@ -7,7 +7,7 @@ function VideoFeed({ data }) {
       {data.length > 0 ? (
         data.map((item) => (
           <div key={item.id} className="h-screen snap-start">
-            <VideoItem item={item} />
+            {item && <VideoItem item={item} />}
           </div>
         ))
       ) : (
