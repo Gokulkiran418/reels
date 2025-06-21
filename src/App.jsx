@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import VideoFeed from './components/VideoFeed';
 import BottomNav from './components/BottomNav';
@@ -11,6 +11,9 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Memoize the data transformation if needed (e.g., sorting, filtering)
+  const memoizedData = useMemo(() => data, [data]);
 
   // Load mock data with a delay and handle fullscreen changes
   useEffect(() => {
@@ -53,11 +56,12 @@ function App() {
         id="playerContainer"
         className={`relative bg-gray-900 overflow-hidden shadow-lg 
           ${isFullscreen
-            ? 'w-full h-full'
-            : 'w-full sm:w-full md:w-[360px] md:h-[620px] lg:w-[400px] lg:h-[691px]'
-          } rounded-none md:rounded-xl`}
+            ? 'w-screen h-screen'
+            : 'w-full h-[calc(100vh-50px)] sm:w-[360px] sm:h-[620px] md:w-[360px] md:h-[620px] lg:w-[600px] lg:h-[calc(100vh-60px)]'
+          } rounded-none sm:rounded-xl`}
+        style={{ marginTop: 'env(safe-area-inset-top)' }} // Handle iOS safe area
       >
-        <VideoFeed data={data} />
+        <VideoFeed data={memoizedData} />
         <BottomNav />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import {
   Heart,
   MessageCircle,
@@ -13,7 +13,7 @@ import {
 import PropTypes from 'prop-types';
 
 // Component to render individual video items with overlays and controls
-function VideoItem({ item }) {
+const VideoItem = React.memo(({ item }) => {
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
   const [isFollowing, setIsFollowing] = useState(false);
@@ -47,8 +47,8 @@ function VideoItem({ item }) {
     };
   }, []);
 
-  // Handle video play/pause on click
-  const handleVideoClick = () => {
+  // Memoize handleVideoClick to avoid re-creation on each render
+  const handleVideoClick = useCallback(() => {
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
@@ -58,26 +58,26 @@ function VideoItem({ item }) {
       setIsPlaying(false);
       setShowControls(true);
     }
-  };
+  }, []);
 
-  // Toggle mute state
-  const toggleMute = () => {
+  // Memoize toggleMute to avoid re-creation on each render
+  const toggleMute = useCallback(() => {
     videoRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
-  };
+  }, [isMuted]);
 
-  // Toggle fullscreen mode
-  const handleFullscreen = () => {
+  // Memoize handleFullscreen to avoid re-creation on each render
+  const handleFullscreen = useCallback(() => {
     const container = document.getElementById('playerContainer');
     if (!document.fullscreenElement) {
       container.requestFullscreen().catch(() => {});
     } else {
       document.exitFullscreen();
     }
-  };
+  }, []);
 
   return (
-    <div className="relative h-full w-full bg-black">
+    <div className="relative h-full w-full bg-transparent">
       <div className="relative h-full w-full">
         <video
           ref={videoRef}
@@ -96,6 +96,7 @@ function VideoItem({ item }) {
       <button
         onClick={toggleMute}
         className="absolute top-4 left-4 bg-black bg-opacity-50 p-2 rounded-lg z-20"
+        aria-label={isMuted ? 'Unmute' : 'Mute'}
       >
         {isMuted ? (
           <VolumeX className="w-6 h-6 text-white" />
@@ -103,9 +104,9 @@ function VideoItem({ item }) {
           <Volume2 className="w-6 h-6 text-white" />
         )}
       </button>
-      <div className="absolute bottom-20 left-3 text-white text-xs max-w-[70%] z-10">
+      <div className="absolute bottom-10 left-4 text-white text-xs max-w-[70%] z-10 sm:max-w-[80%]">
         <p className="text-sm font-semibold text-yellow-400 mb-1">
-          #{item.title.split(' ')[0]} <span className="text-[10px] font-light">{item.episode}</span>
+          #{item.title.split(' ')[0]} <span className="text-[12px] font-light">{item.episode}</span>
         </p>
         <div className="flex items-center mb-1">
           <img
@@ -113,16 +114,17 @@ function VideoItem({ item }) {
             alt={item.userName}
             className="w-6 h-6 rounded-full mr-2"
           />
-          <span className="text-xs mr-2">{item.userName}</span>
+          <span className="text-sm mr-2">{item.userName}</span>
           <button
             onClick={() => setIsFollowing(!isFollowing)}
-            className="px-3 py-1 text-xs border border-white rounded bg-transparent hover:bg-white hover:text-black transition"
+            className="px-2 py-1 text-xs border border-white rounded bg-transparent hover:bg-white hover:text-black transition duration-200"
+            aria-label={isFollowing ? 'Unfollow' : 'Follow'}
           >
             {isFollowing ? 'Following' : 'Follow'}
           </button>
         </div>
         <p
-          className={`text-[11px] text-gray-300 cursor-pointer transition-all duration-200 ease-in-out ${
+          className={`text-sm text-gray-300 cursor-pointer transition-all duration-200 ease-in-out ${
             showFullDesc ? '' : 'line-clamp-3'
           }`}
           onClick={() => setShowFullDesc(!showFullDesc)}
@@ -130,7 +132,7 @@ function VideoItem({ item }) {
           {item.description}
         </p>
       </div>
-      <div className="absolute bottom-44 right-3 flex flex-col items-center space-y-4 text-xs text-white z-10">
+      <div className="absolute bottom-32 right-4 flex flex-col items-center space-y-4 text-sm text-white z-10">
         <div className="flex flex-col items-center">
           <Heart className="w-6 h-6 mb-1" />
           <span>{item.likes.toLocaleString()}</span>
@@ -149,7 +151,7 @@ function VideoItem({ item }) {
         </div>
         <MoreVertical className="w-6 h-6" />
       </div>
-      <div className="absolute bottom-20 right-3 flex flex-col items-end space-y-3 text-xs z-20">
+      <div className="absolute bottom-6 right-4 flex flex-col items-end space-y-3 text-sm z-20">
         {item.isPaid && (
           <span className="px-2 py-1 border border-yellow-400 text-yellow-400 rounded bg-transparent">
             Paid
@@ -157,14 +159,15 @@ function VideoItem({ item }) {
         )}
         <button
           onClick={handleFullscreen}
-          className="px-2 py-1 border border-white text-white rounded bg-transparent hover:bg-white hover:text-black transition"
+          className="px-2 py-1 border border-white text-white rounded bg-transparent hover:bg-white hover:text-black transition duration-200"
+          aria-label="Toggle Fullscreen"
         >
           ⛶
         </button>
       </div>
     </div>
   );
-}
+});
 
 // PropTypes for type checking
 VideoItem.propTypes = {
