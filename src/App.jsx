@@ -1,48 +1,46 @@
-// App.jsx
 import { useState, useEffect, useMemo } from 'react';
 import './App.css';
 import VideoFeed from './components/VideoFeed';
 import BottomNav from './components/BottomNav';
+import Login from './components/Login';
 import mockData from './data/mockData.json';
 
 function App() {
   const [data, setData] = useState([]);
+  const [userID, setUserID] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const memoizedData = useMemo(() => data, [data]);
 
   useEffect(() => {
+    // Load userID from localStorage
+    const storedUser = localStorage.getItem('userID');
+    if (storedUser) setUserID(storedUser);
+
     setLoading(true);
     setTimeout(() => {
-      try {
-        setData(mockData);
-        setLoading(false);
-      } catch {
-        setError('Failed to load videos, please try again later');
-        setLoading(false);
-      }
-    }, 2000);
+      setData(mockData);
+      setLoading(false);
+    }, 1000);
 
-    const onFsChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', onFsChange);
     return () => document.removeEventListener('fullscreenchange', onFsChange);
   }, []);
+
+  const handleLogin = (id) => setUserID(id);
+  const handleLogout = () => {
+    localStorage.removeItem('userID');
+    setUserID(null);
+  };
+
+  if (!userID) return <Login onLogin={handleLogin} />;
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900 text-white">
         Loading...
-      </div>
-    );
-  }
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-900 text-red-500">
-        {error}
       </div>
     );
   }
@@ -58,9 +56,14 @@ function App() {
           } rounded-none sm:rounded-xl`}
         style={{ marginTop: 'env(safe-area-inset-top)' }}
       >
-        {/* *** Only this div scrolls now *** */}
         <VideoFeed data={memoizedData} />
         <BottomNav />
+        <button
+          onClick={handleLogout}
+          className="absolute top-2 right-2 text-sm text-white bg-red-500 px-3 py-1 rounded z-50"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
