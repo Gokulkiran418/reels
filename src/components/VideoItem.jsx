@@ -10,7 +10,9 @@ import {
   Pause,
   Play,
 } from 'lucide-react';
+import PropTypes from 'prop-types';
 
+// Component to render individual video items with overlays and controls
 function VideoItem({ item }) {
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -22,6 +24,7 @@ function VideoItem({ item }) {
   // Guard against undefined item
   if (!item) return null;
 
+  // Set up IntersectionObserver to auto-play video when in view
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -29,7 +32,7 @@ function VideoItem({ item }) {
           if (entry.isIntersecting && entry.intersectionRatio >= 0.8) {
             videoRef.current.play().catch(() => {});
             setIsPlaying(true);
-            setShowControls(false); // Hide controls when auto-playing
+            setShowControls(false);
           } else {
             videoRef.current.pause();
             setIsPlaying(false);
@@ -44,23 +47,26 @@ function VideoItem({ item }) {
     };
   }, []);
 
+  // Handle video play/pause on click
   const handleVideoClick = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
-      setShowControls(false); // Hide controls after play
+      setShowControls(false);
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
-      setShowControls(true); // Show controls when paused
+      setShowControls(true);
     }
   };
 
+  // Toggle mute state
   const toggleMute = () => {
     videoRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
   };
 
+  // Toggle fullscreen mode
   const handleFullscreen = () => {
     const container = document.getElementById('playerContainer');
     if (!document.fullscreenElement) {
@@ -72,7 +78,6 @@ function VideoItem({ item }) {
 
   return (
     <div className="relative h-full w-full bg-black">
-      {/* Video with Play/Pause Overlay */}
       <div className="relative h-full w-full">
         <video
           ref={videoRef}
@@ -88,8 +93,6 @@ function VideoItem({ item }) {
           <Play className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white w-12 h-12 opacity-50 hover:opacity-100 cursor-pointer" />
         ))}
       </div>
-
-      {/* Mute Toggle */}
       <button
         onClick={toggleMute}
         className="absolute top-4 left-4 bg-black bg-opacity-50 p-2 rounded-lg z-20"
@@ -100,8 +103,6 @@ function VideoItem({ item }) {
           <Volume2 className="w-6 h-6 text-white" />
         )}
       </button>
-
-      {/* Left Overlay */}
       <div className="absolute bottom-20 left-3 text-white text-xs max-w-[70%] z-10">
         <p className="text-sm font-semibold text-yellow-400 mb-1">
           #{item.title.split(' ')[0]} <span className="text-[10px] font-light">{item.episode}</span>
@@ -129,8 +130,6 @@ function VideoItem({ item }) {
           {item.description}
         </p>
       </div>
-
-      {/* Right-side Stats */}
       <div className="absolute bottom-44 right-3 flex flex-col items-center space-y-4 text-xs text-white z-10">
         <div className="flex flex-col items-center">
           <Heart className="w-6 h-6 mb-1" />
@@ -150,8 +149,6 @@ function VideoItem({ item }) {
         </div>
         <MoreVertical className="w-6 h-6" />
       </div>
-
-      {/* Paid + Fullscreen Buttons */}
       <div className="absolute bottom-20 right-3 flex flex-col items-end space-y-3 text-xs z-20">
         {item.isPaid && (
           <span className="px-2 py-1 border border-yellow-400 text-yellow-400 rounded bg-transparent">
@@ -168,5 +165,23 @@ function VideoItem({ item }) {
     </div>
   );
 }
+
+// PropTypes for type checking
+VideoItem.propTypes = {
+  item: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    videoUrl: PropTypes.string.isRequired,
+    userImage: PropTypes.string.isRequired,
+    userName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    episode: PropTypes.string,
+    description: PropTypes.string.isRequired,
+    likes: PropTypes.number.isRequired,
+    comments: PropTypes.number.isRequired,
+    shares: PropTypes.number.isRequired,
+    earnings: PropTypes.number.isRequired,
+    isPaid: PropTypes.bool.isRequired,
+  }).isRequired,
+};
 
 export default VideoItem;

@@ -28,7 +28,7 @@
     "isPaid": false
   },
   {
-    "id": 2,
+    "id": 3,
     "videoUrl": "./reels/running.mp4",
     "title": "runningman",
     "episode": "EP 09",
@@ -42,7 +42,7 @@
     "isPaid": true
   },
   {
-    "id": 2,
+    "id": 4,
     "videoUrl": "./reels/dancing.mp4",
     "title": "dancingguy",
     "episode": "EP 10",
