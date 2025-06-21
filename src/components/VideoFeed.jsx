@@ -1,43 +1,77 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+// components/VideoFeed.jsx
+import React, { useState, useEffect, useCallback } from 'react';
 import VideoItem from './VideoItem';
+import PropTypes from 'prop-types';
+import mockData from '../data/mockData.json';
 
-// Component to render a vertical scrollable video feed
+const VIDEOS_PER_PAGE = 5;
+
 const VideoFeed = React.memo(({ data }) => {
-  // Render video items if data exists, otherwise show a fallback message
+  const [videos, setVideos] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+
+  const fetchMoreVideos = useCallback(() => {
+    const start = (page - 1) * VIDEOS_PER_PAGE;
+    const end = start + VIDEOS_PER_PAGE;
+    const slice = data.slice(start, end);
+
+    if (slice.length === 0) {
+      setHasMore(false);
+      return;
+    }
+
+    setVideos((prev) => [...prev, ...slice]);
+    setPage((prev) => prev + 1);
+  }, [page, data]);
+
+  useEffect(() => {
+    // initial load
+    fetchMoreVideos();
+  }, []); // eslint-disable-line
+
+  // When user scrolls to bottom, load next page
+  const handleScroll = (e) => {
+    const { scrollTop, clientHeight, scrollHeight } = e.currentTarget;
+    if (hasMore && scrollTop + clientHeight >= scrollHeight - 2) {
+      fetchMoreVideos();
+    }
+  };
+
   return (
-    <div className="h-full w-full overflow-y-auto snap-y snap-mandatory scrollbar-hide">
-      {data.length > 0 ? (
-        data.map((item) => (
-          <div key={item.id} className="h-[calc(100vh-50px)] sm:h-[620px] md:h-[620px] lg:h-[calc(100vh-60px)] snap-start">
-            {item && <VideoItem item={item} />}
-          </div>
-        ))
-      ) : (
-        <div className="flex items-center justify-center h-[calc(100vh-50px)] sm:h-[620px] md:h-[620px] lg:h-[calc(100vh-60px)] text-white">
-          No videos available
+    <div
+    onScroll={handleScroll}
+    className="scrollbar-hidden"
+    style={{
+      height: 'calc(100vh - 50px)',
+      overflowY: 'auto',
+      scrollSnapType: 'y mandatory',
+    }}
+>
+
+      {videos.map((item, idx) => (
+        <div
+          key={`${item.id}_${idx}`}        // avoid duplicate keys
+          style={{
+            height: 'calc(100vh - 50px)',
+            scrollSnapAlign: 'start',
+          }}
+        >
+          <VideoItem item={item} />
+        </div>
+      ))}
+
+      {!hasMore && (
+        <div className="flex items-center justify-center text-white h-12">
+          No more videos to load
         </div>
       )}
     </div>
   );
 });
 
-// PropTypes for type checking
 VideoFeed.propTypes = {
-  data: PropTypes.arrayOf(PropTypes.shape({
-    id: PropTypes.number.isRequired,
-    videoUrl: PropTypes.string.isRequired,
-    userImage: PropTypes.string.isRequired,
-    userName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    episode: PropTypes.string,
-    description: PropTypes.string.isRequired,
-    likes: PropTypes.number.isRequired,
-    comments: PropTypes.number.isRequired,
-    shares: PropTypes.number.isRequired,
-    earnings: PropTypes.number.isRequired,
-    isPaid: PropTypes.bool.isRequired,
-  })).isRequired,
+  data: PropTypes.array.isRequired,
 };
 
 export default VideoFeed;

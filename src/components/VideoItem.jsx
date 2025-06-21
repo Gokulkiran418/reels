@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-// Component to render individual video items with overlays and controls
 const VideoItem = React.memo(({ item }) => {
   const videoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -20,11 +19,12 @@ const VideoItem = React.memo(({ item }) => {
   const [showFullDesc, setShowFullDesc] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const [likes, setLikes] = useState(item.likes);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Guard against undefined item
   if (!item) return null;
 
-  // Set up IntersectionObserver to auto-play video when in view
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -47,7 +47,6 @@ const VideoItem = React.memo(({ item }) => {
     };
   }, []);
 
-  // Memoize handleVideoClick to avoid re-creation on each render
   const handleVideoClick = useCallback(() => {
     if (videoRef.current.paused) {
       videoRef.current.play();
@@ -60,13 +59,11 @@ const VideoItem = React.memo(({ item }) => {
     }
   }, []);
 
-  // Memoize toggleMute to avoid re-creation on each render
   const toggleMute = useCallback(() => {
     videoRef.current.muted = !isMuted;
     setIsMuted(!isMuted);
   }, [isMuted]);
 
-  // Memoize handleFullscreen to avoid re-creation on each render
   const handleFullscreen = useCallback(() => {
     const container = document.getElementById('playerContainer');
     if (!document.fullscreenElement) {
@@ -75,6 +72,26 @@ const VideoItem = React.memo(({ item }) => {
       document.exitFullscreen();
     }
   }, []);
+
+  const handleLike = useCallback(() => {
+    setIsLoading(true);
+    const previousLikes = likes;
+    const previousIsLiked = isLiked;
+
+    // Optimistic update
+    setIsLiked(true);
+    setLikes((prev) => prev + 1);
+
+    // Simulated API call
+    setTimeout(() => {
+      const success = Math.random() > 0.3; // 70% success rate
+      if (!success) {
+        setIsLiked(previousIsLiked);
+        setLikes(previousLikes);
+      }
+      setIsLoading(false);
+    }, 1500);
+  }, [likes, isLiked]);
 
   return (
     <div className="relative h-full w-full bg-transparent">
@@ -134,8 +151,17 @@ const VideoItem = React.memo(({ item }) => {
       </div>
       <div className="absolute bottom-32 right-4 flex flex-col items-center space-y-4 text-sm text-white z-10">
         <div className="flex flex-col items-center">
-          <Heart className="w-6 h-6 mb-1" />
-          <span>{item.likes.toLocaleString()}</span>
+          <button
+            onClick={handleLike}
+            disabled={isLoading}
+            className="focus:outline-none"
+            aria-label={isLiked ? 'Unlike' : 'Like'}
+          >
+            <Heart
+              className={`w-6 h-6 mb-1 ${isLiked ? 'text-red-500 fill-current' : 'text-white'}`}
+            />
+          </button>
+          <span>{likes.toLocaleString()}</span>
         </div>
         <div className="flex flex-col items-center">
           <MessageCircle className="w-6 h-6 mb-1" />
@@ -169,7 +195,6 @@ const VideoItem = React.memo(({ item }) => {
   );
 });
 
-// PropTypes for type checking
 VideoItem.propTypes = {
   item: PropTypes.shape({
     id: PropTypes.number.isRequired,
