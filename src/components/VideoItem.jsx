@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Heart,
   MessageCircle,
@@ -22,6 +23,7 @@ const VideoItem = React.memo(({ item }) => {
   const [likes, setLikes] = useState(item.likes);
   const [isLiked, setIsLiked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   if (!item) return null;
 
@@ -129,7 +131,8 @@ const VideoItem = React.memo(({ item }) => {
           <img
             src={item.userImage}
             alt={item.userName}
-            className="w-6 h-6 rounded-full mr-2"
+            className="w-6 h-6 rounded-full mr-2 cursor-pointer"
+            onClick={() => navigate(`/profile/${item.userName}`)}
           />
           <span className="text-sm mr-2">{item.userName}</span>
           <button
